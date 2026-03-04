@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CA Quiz 6 (Randomized) - GI & Hepatobiliary</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:rgba(255,255,255,.03);
+      --line:rgba(255,255,255,.12);
+      --muted:#9fb0d0;
+      --text:#e8eefc;
+      --accent:#4f8cff;
+      --ok:#2ecc71;
+      --bad:#ff5c5c;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(180deg, #070b14 0%, var(--bg) 100%);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      padding:24px;
+    }
+    .app{width:min(980px, 100%)}
+    .topbar{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 16px;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line);
+      border-radius:14px;
+      position:sticky;
+      top:12px;
+      backdrop-filter: blur(10px);
+      z-index:5;
+      flex-wrap:wrap;
+    }
+    .score{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+    .score strong{letter-spacing:.2px}
+    .muted{color:var(--muted)}
+    .card{
+      margin-top:14px;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:18px;
+    }
+    .qmeta{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .pill{
+      display:inline-flex;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-size:13px;
+    }
+    h1{font-size:18px;line-height:1.35;margin:10px 0 14px 0;font-weight:750}
+    .options{display:grid;gap:10px;margin:12px 0 14px}
+    .opt{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.02);
+      cursor:pointer;
+      user-select:none;
+    }
+    .opt:hover{ border-color: rgba(79,140,255,.55); }
+    .opt input{margin-top:3px;transform:scale(1.15);accent-color:var(--accent)}
+    .opt.correct{border-color:rgba(46,204,113,.7);background:rgba(46,204,113,.10)}
+    .opt.incorrect{border-color:rgba(255,92,92,.7);background:rgba(255,92,92,.08)}
+    .opt.chosen{outline:2px solid rgba(79,140,255,.55);outline-offset:1px}
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:10px;
+      padding-top:12px;
+      border-top:1px solid var(--line);
+    }
+    button{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:650;
+    }
+    button.primary{
+      background: rgba(79,140,255,.16);
+      border-color: rgba(79,140,255,.40);
+    }
+    button:disabled{opacity:.55;cursor:not-allowed}
+    .feedback{
+      margin-top:12px;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.02);
+    }
+    .result{font-weight:850;margin-bottom:6px}
+    .result.ok{color:var(--ok)}
+    .result.bad{color:var(--bad)}
+    .footerNote{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.4}
+    .end{text-align:center;padding:22px 18px}
+    .end h2{margin:0 0 8px;font-size:22px}
+    .end p{margin:6px 0;color:var(--muted)}
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      border:1px solid var(--line);
+      padding:2px 6px;
+      border-radius:8px;
+      background:rgba(0,0,0,.2);
+      color:var(--text);
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app"></div>
+
+<script>
+/*
+  Source: CA Quiz 6 PDF (STEM-Based NCLEX Style Practice Quiz + Answer Key and Rationales). [file:2]
+  Randomizes question order each attempt; options stay as A–D as written.
+*/
+
+const quizBank = [
+  // Section 1: Assessment and Diagnostic Reasoning (10)
+  {id:1, sectionTitle:"Section 1: Assessment and Diagnostic Reasoning", sectionQ:1, prompt:"A nurse is performing a focused gastrointestinal assessment. Which sequence should the nurse follow to ensure the most accurate findings?", options:["Inspection, Palpation, Percussion, Auscultation","Inspection, Auscultation, Percussion, Palpation","Auscultation, Inspection, Palpation, Percussion","Percussion, Auscultation, Inspection, Palpation"], correctIndex:1, rationale:"Auscultation is done before percussion and palpation to avoid producing false bowel sounds."},
+  {id:2, sectionTitle:"Section 1: Assessment and Diagnostic Reasoning", sectionQ:2, prompt:"During abdominal percussion, the nurse hears a dull sound over the right upper quadrant. This finding is most likely indicative of:", options:["An air-filled stomach","The presence of the liver","A mechanical bowel obstruction","A distended bladder"], correctIndex:1, rationale:"Dullness is the normal percussion sound heard over solid organs like the liver."},
+  {id:3, sectionTitle:"Section 1: Assessment and Diagnostic Reasoning", sectionQ:3, prompt:"A 44-year-old patient reports gnawing epigastric pain that occurs 2 to 3 hours after meals. The nurse suspects:", options:["Gastric ulcer","Duodenal ulcer","Chronic cholecystitis","Acute hepatitis"], correctIndex:1, rationale:"Duodenal ulcers typically cause pain 2–3 hours after a meal when chyme enters the duodenum."},
+  {id:4, sectionTitle:"Section 1: Assessment and Diagnostic Reasoning", sectionQ:4, prompt:"Which physical exam finding would most strongly suggest the presence of ascites?", options:["High-pitched, tinkling bowel sounds","A positive fluid wave and shifting dullness","Rebound tenderness in the right lower quadrant","A palpable mass in the epigastric region"], correctIndex:1, rationale:"These are specific physical exam findings used to detect free fluid in the peritoneal cavity."},
+  {id:5, sectionTitle:"Section 1: Assessment and Diagnostic Reasoning", sectionQ:5, prompt:"A patient with suspected mechanical intestinal obstruction presents with abdominal distension. What type of bowel sounds does the nurse anticipate?", options:["Absent bowel sounds","Normoactive bowel sounds","High-pitched, \"metallic\" tinkling sounds","Bruits over the abdominal aorta"], correctIndex:2, rationale:"High-pitched, metallic tinkling sounds are characteristic of mechanical obstruction as the bowel tries to push past a blockage."},
+  {id:6, sectionTitle:"Section 1: Assessment and Diagnostic Reasoning", sectionQ:6, prompt:"When assessing for jaundice in a patient with dark skin, which area is the most reliable for the nurse to inspect?", options:["The palms of the hands","The soles of the feet","The sclera and mucous membranes","The skin of the abdomen"], correctIndex:2, rationale:"Sclera and mucous membranes (like the palate) show yellowing most clearly in dark-skinned individuals."},
+  {id:7, sectionTitle:"Section 1: Assessment and Diagnostic Reasoning", sectionQ:7, prompt:"A patient’s blood results show a Hemoglobin (Hb) of 10.3 g/dL and a Hematocrit (Hct) of 40%. The nurse recognizes these findings as:", options:["Normal for an adult female","Indicative of polycythemia","Consistent with chronic blood loss or anemia","Indicative of acute dehydration"], correctIndex:2, rationale:"Hb of 10.3 g/dL is below the normal range (12–16 g/dL for females), suggesting anemia or blood loss."},
+  {id:8, sectionTitle:"Section 1: Assessment and Diagnostic Reasoning", sectionQ:8, prompt:"The nurse notes \"apple core sign\" on a patient's barium enema report. The nurse understands this is a classic radiographic sign of:", options:["Peptic ulcer disease","Intestinal adhesions","Colon cancer (annular growth)","Volvulus"], correctIndex:2, rationale:"This sign is seen in annular tumors of the colon, particularly in the sigmoid region."},
+  {id:9, sectionTitle:"Section 1: Assessment and Diagnostic Reasoning", sectionQ:9, prompt:"A patient is scheduled for a 13C-Urea Breath Test. Which instruction is vital for the nurse to provide?", options:["\"You must eat a high-fat meal before the test.\"","\"The test requires you to swallow a tablet on an empty stomach.\"","\"You will need to lie on your right side for 30 minutes after taking the tablet.\"","\"The test is used to diagnose colon cancer.\""], correctIndex:1, rationale:"The tablet contains 13C-urea, which reacts with H. pylori to release labeled CO2 in the breath."},
+  {id:10, sectionTitle:"Section 1: Assessment and Diagnostic Reasoning", sectionQ:10, prompt:"A nurse is assessing a patient for hepatic encephalopathy. Which task should the nurse ask the patient to perform daily to monitor progression?", options:["Ambulate 50 feet","Write their signature or a simple sentence","Recite the alphabet backward","Perform a deep breathing exercise"], correctIndex:1, rationale:"Deteriorating handwriting is a clinical indicator of increasing ammonia levels and worsening encephalopathy."},
+
+  // Section 2: Pathophysiology of Gastric and Intestinal Disorders (10)
+  {id:11, sectionTitle:"Section 2: Pathophysiology of Gastric and Intestinal Disorders", sectionQ:1, prompt:"What is the primary mechanism by which NSAIDs contribute to Peptic Ulcer Disease (PUD)?", options:["Direct stimulation of parietal cells","Inhibition of the COX-1 enzyme, reducing mucosal prostaglandins","Increasing the production of bicarbonate in the duodenum","Promoting the colonization of H. pylori"], correctIndex:1, rationale:"COX-1 inhibition stops the production of protective prostaglandins, leaving the mucosa vulnerable to acid."},
+  {id:12, sectionTitle:"Section 2: Pathophysiology of Gastric and Intestinal Disorders", sectionQ:2, prompt:"A patient is diagnosed with H. pylori-induced ulcers. The nurse explains that these bacteria cause damage primarily by:", options:["Releasing toxins that directly dissolve the gastric muscle layer","Penetrating the mucus lining and disrupting protective mechanisms","Decreasing the secretion of gastrin","Increasing the speed of gastric emptying"], correctIndex:1, rationale:"H. pylori survives the acidic environment by burrowing into the mucus layer and disrupting defenses."},
+  {id:13, sectionTitle:"Section 2: Pathophysiology of Gastric and Intestinal Disorders", sectionQ:3, prompt:"How does the pain of a gastric ulcer typically differ from that of a duodenal ulcer?", options:["Gastric ulcer pain is relieved by food.","Gastric ulcer pain increases 15 to 30 minutes after a meal.","Duodenal ulcer pain occurs immediately upon swallowing.","Duodenal ulcer pain is only felt in the left lower quadrant."], correctIndex:1, rationale:"Food triggers acid secretion; since the pyloric sphincter is closed, acid stays in the stomach and irritates the gastric ulcer."},
+  {id:14, sectionTitle:"Section 2: Pathophysiology of Gastric and Intestinal Disorders", sectionQ:4, prompt:"A patient with a complete mechanical intestinal obstruction is at high risk for which complication if left untreated?", options:["Metabolic alkalosis only","Bowel ischemia, necrosis, and perforation","Increased absorption of nutrients","Decrease in abdominal girth"], correctIndex:1, rationale:"Obstruction stops flow, causing pressure that can cut off blood supply (ischemia) leading to tissue death and rupture."},
+  {id:15, sectionTitle:"Section 2: Pathophysiology of Gastric and Intestinal Disorders", sectionQ:5, prompt:"In a patient with left-sided (distal) colon cancer, the nurse is most likely to observe which clinical manifestation?", options:["Iron deficiency anemia without visible bleeding","Changes in bowel habits and decreased caliber of stools","Large, bulky, exophytic masses","Low risk of obstruction due to a wide lumen"], correctIndex:1, rationale:"Distal tumors narrow the lumen, causing changes in bowel habits and \"pencil\" stools."},
+  {id:16, sectionTitle:"Section 2: Pathophysiology of Gastric and Intestinal Disorders", sectionQ:6, prompt:"Which of the following is considered a \"functional\" rather than mechanical intestinal obstruction?", options:["Adhesions from previous surgery","A tumor in the sigmoid colon","Failure of peristalsis (paralytic ileus)","Intussusception"], correctIndex:2, rationale:"Functional obstruction (paralytic ileus) is a failure of the muscle/nerves to move contents, not a physical blockage."},
+  {id:17, sectionTitle:"Section 2: Pathophysiology of Gastric and Intestinal Disorders", sectionQ:7, prompt:"A patient with PUD suddenly develops a rigid, board-like abdomen and severe pain. This likely indicates:", options:["Normal healing of the ulcer","Perforation into the peritoneal cavity","The development of a duodenal obstruction","A reaction to antacid medication"], correctIndex:1, rationale:"Rigidity and severe pain are classic signs of peritonitis following a perforation."},
+  {id:18, sectionTitle:"Section 2: Pathophysiology of Gastric and Intestinal Disorders", sectionQ:8, prompt:"The \"fecal odor\" noted in the vomitus of a patient with an intestinal obstruction indicates the obstruction is likely located in the:", options:["Stomach","Proximal small intestine","Lower/distal portion of the intestine","Esophagus"], correctIndex:2, rationale:"Foul fecal odor in vomit occurs with distal obstructions where bacteria have contaminated the contents."},
+  {id:19, sectionTitle:"Section 2: Pathophysiology of Gastric and Intestinal Disorders", sectionQ:9, prompt:"Why is a patient with right-sided colon cancer often diagnosed later than one with left-sided cancer?", options:["Right-sided tumors are always benign initially.","Stool is more liquid in the ascending colon, allowing it to pass the tumor easily.","Right-sided tumors cause immediate intense pain.","The right-side lumen is much narrower than the left."], correctIndex:1, rationale:"Stool is liquid on the right side, so it passes even large tumors without causing early obstruction symptoms."},
+  {id:20, sectionTitle:"Section 2: Pathophysiology of Gastric and Intestinal Disorders", sectionQ:10, prompt:"A patient with cirrhosis has a high ammonia level. Pathophysiologically, this is because:", options:["The liver is overproducing urea.","The liver cannot convert ammonia to urea for excretion.","The kidneys are retaining too much nitrogen.","The patient is consuming too much dietary fiber."], correctIndex:1, rationale:"Ammonia is a byproduct of protein metabolism; the diseased liver fails to convert it into urea."},
+
+  // Section 3: Hepatobiliary Disorders (10)
+  {id:21, sectionTitle:"Section 3: Hepatobiliary Disorders", sectionQ:1, prompt:"A patient is a chronic carrier of Hepatitis B. The nurse knows that the presence of which marker indicates the virus is actively replicating and the patient is highly infectious?", options:["Anti-HBs","HBeAg","Anti-HBe","HBsAg (only)"], correctIndex:1, rationale:"HBeAg is a marker of active viral replication and high infectiousness."},
+  {id:22, sectionTitle:"Section 3: Hepatobiliary Disorders", sectionQ:2, prompt:"Which form of hepatitis is primarily transmitted through the fecal-oral route via contaminated food or water?", options:["Hepatitis B","Hepatitis C","Hepatitis A","Hepatitis D"], correctIndex:2, rationale:"Hepatitis A and E are fecal-oral; others are primarily bloodborne."},
+  {id:23, sectionTitle:"Section 3: Hepatobiliary Disorders", sectionQ:3, prompt:"A patient with cirrhosis presents with spider angiomas and palmar erythema. These integumentary changes are due to:", options:["Increased levels of circulating estrogen","Severe vitamin K deficiency","High levels of bilirubin in the skin","Peripheral vascular disease"], correctIndex:0, rationale:"The liver cannot metabolize steroid hormones; high estrogen levels cause vasodilation (angiomas/erythema)."},
+  {id:24, sectionTitle:"Section 3: Hepatobiliary Disorders", sectionQ:4, prompt:"What is the primary cause of portal hypertension in a patient with cirrhosis?", options:["Excessive intake of sodium","Fibrosis and regenerative nodules distorting liver architecture","Obstruction of the common bile duct by gallstones","Increased cardiac output from the right ventricle"], correctIndex:1, rationale:"Structural changes in the liver increase resistance to portal blood flow."},
+  {id:25, sectionTitle:"Section 3: Hepatobiliary Disorders", sectionQ:5, prompt:"A patient with liver failure has a low serum albumin level (2 g/dL). The nurse expects to find:", options:["Increased clotting time","Peripheral edema and ascites","Hypertension","Improved wound healing"], correctIndex:1, rationale:"Low albumin reduces oncotic pressure, allowing fluid to leak into tissues (edema) and the abdomen (ascites)."},
+  {id:26, sectionTitle:"Section 3: Hepatobiliary Disorders", sectionQ:6, prompt:"Which finding is characteristic of the \"icteric phase\" of acute hepatitis?", options:["Flu-like symptoms and malaise","Yellowing of the sclera and dark-colored urine","Return of normal appetite","Weight gain and increased energy"], correctIndex:1, rationale:"This is the stage where jaundice becomes apparent due to bilirubin buildup."},
+  {id:27, sectionTitle:"Section 3: Hepatobiliary Disorders", sectionQ:7, prompt:"A patient with cholecystitis reports pain in the right upper quadrant that radiates to the right shoulder. This is known as:", options:["Murphy's sign","Boas sign","Kehr's sign","Grey Turner's sign"], correctIndex:1, rationale:"Boas sign is referred pain to the right shoulder from gallbladder inflammation."},
+  {id:28, sectionTitle:"Section 3: Hepatobiliary Disorders", sectionQ:8, prompt:"In liver cirrhosis, \"caput medusae\" refers to:", options:["Enlarged lymph nodes in the neck","Dilated veins around the umbilicus","Small, purple spots on the skin","A specific type of liver nodule"], correctIndex:1, rationale:"These are dilated collateral veins due to portal hypertension."},
+  {id:29, sectionTitle:"Section 3: Hepatobiliary Disorders", sectionQ:9, prompt:"The Child-Pugh classification uses which of the following parameters to categorize the severity of liver disease?", options:["WBC count, Platelets, and Glucose","AST, ALT, and GGT","Bilirubin, Albumin, INR, Ascites, and Encephalopathy","Height, Weight, and BMI"], correctIndex:2, rationale:"These five parameters are the standard for Child-Pugh scoring."},
+  {id:30, sectionTitle:"Section 3: Hepatobiliary Disorders", sectionQ:10, prompt:"A patient with cirrhosis has a prolonged Prothrombin Time (PT). The nurse understands this is because:", options:["The liver is not producing enough clotting factors.","The patient is experiencing a Vitamin C deficiency.","There is an overabundance of platelets.","The patient is likely taking too much Aspirin."], correctIndex:0, rationale:"Most clotting factors are synthesized in the liver; dysfunction leads to bleeding tendencies and high PT/INR."},
+
+  // Section 4: Pharmacology (10)
+  {id:31, sectionTitle:"Section 4: Pharmacology", sectionQ:1, prompt:"When should the nurse instruct a patient to take Omeprazole (a PPI) for maximum effectiveness?", options:["Immediately after a large meal","1 hour before food","At bedtime with a snack","Only when pain is felt"], correctIndex:1, rationale:"PPIs should be taken before meals to inhibit the pumps before they are activated by food."},
+  {id:32, sectionTitle:"Section 4: Pharmacology", sectionQ:2, prompt:"A patient is prescribed \"Triple Therapy\" for H. pylori. The nurse anticipates the prescription will include:", options:["A PPI and two antibiotics","An antacid, a laxative, and an anti-emetic","A PPI, Bismuth, and one antibiotic","Metoclopramide, Ondansetron, and Amoxicillin"], correctIndex:0, rationale:"Standard triple therapy includes a PPI and two antibiotics (e.g., Amoxicillin and Clarithromycin)."},
+  {id:33, sectionTitle:"Section 4: Pharmacology", sectionQ:3, prompt:"A patient is taking long-term antacids (e.g., Gelusil). Which common side effect should the nurse monitor for?", options:["Diarrhea","Constipation","Insomnia","Tachycardia"], correctIndex:1, rationale:"Long-term antacid use is a common cause of constipation."},
+  {id:34, sectionTitle:"Section 4: Pharmacology", sectionQ:4, prompt:"Which medication is a dopamine antagonist used as an anti-emetic and prokinetic agent?", options:["Ondansetron","Metoclopramide","Scopolamine","Dexamethasone"], correctIndex:1, rationale:"Metoclopramide blocks D2 receptors and has prokinetic effects on the GI tract."},
+  {id:35, sectionTitle:"Section 4: Pharmacology", sectionQ:5, prompt:"A nurse is preparing to administer Macrogol (Polyethylene Glycol). What is the mechanism of action for this medication?", options:["Directly stimulating the intestinal nerves","Drawing water into the intestinal lumen via osmosis","Lubricating the stool surface","Neutralizing gastric acid"], correctIndex:1, rationale:"As an osmotic laxative, it pulls water in to soften stool and stimulate peristalsis."},
+  {id:36, sectionTitle:"Section 4: Pharmacology", sectionQ:6, prompt:"A patient is prescribed Lactulose for hepatic encephalopathy. The nurse knows the medication is effective if:", options:["The patient has 10 loose stools per day.","The patient's serum ammonia level decreases and mental status improves.","The patient's jaundice disappears.","The patient's blood pressure stabilizes."], correctIndex:1, rationale:"Lactulose draws ammonia into the bowel to be excreted; improvement in mentation is the goal."},
+  {id:37, sectionTitle:"Section 4: Pharmacology", sectionQ:7, prompt:"A patient is receiving empiric antibiotic therapy. The nurse explains this is:", options:["Therapy started after culture results are finalized.","Therapy started based on clinical judgment before cultures are back.","Therapy used only for viral infections.","The use of narrow-spectrum drugs only."], correctIndex:1, rationale:"Empiric therapy is started \"best guess\" before laboratory confirmation to prevent deterioration."},
+  {id:38, sectionTitle:"Section 4: Pharmacology", sectionQ:8, prompt:"Why is \"de-escalation\" of antibiotic therapy important in the hospital setting?", options:["To increase the cost of treatment","To prevent antimicrobial resistance and reduce adverse effects","To ensure the patient stays in the hospital longer","To allow the use of bacteriostatic rather than bactericidal drugs"], correctIndex:1, rationale:"Switching to narrow-spectrum drugs reduces the risk of resistance and superinfections."},
+  {id:39, sectionTitle:"Section 4: Pharmacology", sectionQ:9, prompt:"A patient taking antibiotics for 5 days develops severe diarrhea. The nurse suspects a superinfection caused by:", options:["H. pylori","Clostridium difficile","Hepatitis A","E. coli"], correctIndex:1, rationale:"Antibiotics disrupt normal flora, allowing C. difficile to overgrow."},
+  {id:40, sectionTitle:"Section 4: Pharmacology", sectionQ:10, prompt:"Which anti-emetic class is specifically used for motion sickness by inhibiting M1 receptors?", options:["5-HT3 antagonists (Ondansetron)","Muscarinic antagonists (Scopolamine)","NK1 antagonists (Aprepitant)","Histamine H1 antagonists (Promethazine)"], correctIndex:1, rationale:"Scopolamine is the primary M1 antagonist used for motion sickness."},
+
+  // Section 5: Nursing Implementation and Management (10)
+  {id:41, sectionTitle:"Section 5: Nursing Implementation and Management", sectionQ:1, prompt:"A patient with an upper GI bleed has a hemoglobin of 6.5 g/dL. What is the nurse’s priority intervention?", options:["Prepare for a STAT barium enema.","Initiate IV fluid resuscitation and prepare for blood transfusion.","Administer an oral laxative.","Encourage the patient to walk to increase circulation."], correctIndex:1, rationale:"Severe anemia and bleeding require stabilization of airway, breathing, and circulation (resuscitation)."},
+  {id:42, sectionTitle:"Section 5: Nursing Implementation and Management", sectionQ:2, prompt:"For a patient with a Nasogastric Tube (NGT) inserted for gastric decompression due to obstruction, what is the appropriate suction setting?", options:["High continuous suction","Low intermittent suction","No suction, gravity drainage only","High intermittent suction"], correctIndex:1, rationale:"Low intermittent suction prevents the tube from adhering to and damaging the gastric mucosa."},
+  {id:43, sectionTitle:"Section 5: Nursing Implementation and Management", sectionQ:3, prompt:"A nurse is caring for a patient post-laparoscopic cholecystectomy. The patient complains of \"wind pain\" in the right shoulder. What is the best nursing action?", options:["Apply a cold compress to the shoulder.","Encourage early ambulation to help disperse CO2.","Keep the patient strictly on bed rest.","Administer a high-dose NSAID immediately."], correctIndex:1, rationale:"Ambulation helps the body absorb/expel the CO2 gas used during laparoscopy."},
+  {id:44, sectionTitle:"Section 5: Nursing Implementation and Management", sectionQ:4, prompt:"Which dietary modification should the nurse recommend to a patient with chronic cholecystitis?", options:["High-fat, high-protein diet","Low-fat diet, avoiding fried foods","High-fiber, high-sodium diet","Liquid diet only"], correctIndex:1, rationale:"Fat restriction reduces gallbladder contraction and associated biliary pain."},
+  {id:45, sectionTitle:"Section 5: Nursing Implementation and Management", sectionQ:5, prompt:"In managing a patient with ascites, which position helps prevent respiratory distress caused by abdominal pressure?", options:["Supine","Trendelenburg","Semi-Fowler’s","Left lateral sims"], correctIndex:2, rationale:"This position allows the diaphragm to expand more easily by dropping the abdominal contents."},
+  {id:46, sectionTitle:"Section 5: Nursing Implementation and Management", sectionQ:6, prompt:"What is the primary nursing goal during the first 24 hours following a colostomy creation?", options:["Teaching the patient how to irrigate the stoma.","Assessing the stoma color and ensuring it is moist and reddish-pink.","Encouraging the patient to eat a high-fiber meal.","Managing the patient's anxiety about returning to work."], correctIndex:1, rationale:"Assessment of stoma viability (color/circulation) is the immediate priority."},
+  {id:47, sectionTitle:"Section 5: Nursing Implementation and Management", sectionQ:7, prompt:"A nurse is preparing a patient for abdominal paracentesis. What must the nurse ask the patient to do immediately before the procedure?", options:["Eat a full meal.","Void to empty the bladder.","Run a mile to increase heart rate.","Take a dose of a stimulant laxative."], correctIndex:1, rationale:"An empty bladder reduces the risk of accidental puncture during the procedure."},
+  {id:48, sectionTitle:"Section 5: Nursing Implementation and Management", sectionQ:8, prompt:"A patient with cirrhosis is on a sodium-restricted diet. Which of the following should the patient avoid?", options:["Fresh fruits","Canned soups and processed meats","Herbs and lemon juice for seasoning","Steamed vegetables"], correctIndex:1, rationale:"These items are high in hidden sodium and contribute to fluid retention."},
+  {id:49, sectionTitle:"Section 5: Nursing Implementation and Management", sectionQ:9, prompt:"When assessing a patient's stoma, the nurse notes it is dark purple/black. What does this indicate?", options:["Normal postoperative healing","Adequate blood supply","Ischemia or necrosis requiring immediate intervention","A reaction to dietary intake of iron"], correctIndex:2, rationale:"This indicates a lack of blood flow and is a surgical emergency."},
+  {id:50, sectionTitle:"Section 5: Nursing Implementation and Management", sectionQ:10, prompt:"A patient with hepatic encephalopathy is prescribed a high cleansing enema. The rationale for this is to:", options:["Relieve constipation only.","Reduce ammonia absorption from the GI tract.","Increase the patient’s potassium level.","Stimulate the gallbladder to release bile."], correctIndex:1, rationale:"Removing protein/blood from the gut reduces the substrate for ammonia production."},
+
+  // Section 6: Perioperative and Operating Theatre (OT) Standards (10)
+  {id:51, sectionTitle:"Section 6: Perioperative and Operating Theatre (OT) Standards", sectionQ:1, prompt:"Which nurse is responsible for providing the surgeon with instruments and maintaining strict surgical asepsis?", options:["Circulating nurse","Scrub nurse","Anaesthetic nurse","Recovery nurse"], correctIndex:1, rationale:"Scrub nurses handle the sterile instruments within the sterile field."},
+  {id:52, sectionTitle:"Section 6: Perioperative and Operating Theatre (OT) Standards", sectionQ:2, prompt:"During a \"Time-Out\" in the OT, the team must confirm:", options:["The correct patient, correct procedure, and correct site.","The patient’s insurance status.","The surgeon’s preference for music.","The time the patient last ate."], correctIndex:0, rationale:"This is a safety protocol to prevent wrong-site/wrong-patient surgery."},
+  {id:53, sectionTitle:"Section 6: Perioperative and Operating Theatre (OT) Standards", sectionQ:3, prompt:"What is the correct position for hands and arms after a surgical handrub is completed?", options:["Relaxed at the sides","Folded across the chest","Fingertips up, elbows down, and hands above waist level","Hands tucked into the armpits"], correctIndex:2, rationale:"This maintains the sterility of the hands and arms."},
+  {id:54, sectionTitle:"Section 6: Perioperative and Operating Theatre (OT) Standards", sectionQ:4, prompt:"A surgical handrub should be performed:", options:["Only if the nurse's hands are visibly soiled.","Just before gowning and gloving for each procedure.","Once at the beginning of the shift only.","After the surgery is completed."], correctIndex:1, rationale:"It is a specific preparation for a sterile surgical procedure."},
+  {id:55, sectionTitle:"Section 6: Perioperative and Operating Theatre (OT) Standards", sectionQ:5, prompt:"In the OT, a \"Circulating Nurse\" is primarily responsible for:", options:["Passing instruments to the surgeon.","Scrubbing in and wearing a sterile gown.","Acting as the charge nurse and coordinating the OT team.","Maintaining the sterile field directly."], correctIndex:2, rationale:"The circulating nurse manages the room and coordinates the team from outside the sterile field."},
+  {id:56, sectionTitle:"Section 6: Perioperative and Operating Theatre (OT) Standards", sectionQ:6, prompt:"When gowning, the scrub nurse should:", options:["Touch the outside of the gown with bare hands.","Slip both arms into the armholes while keeping fingers within the sleeves.","Fasten the back of the gown themselves.","Shake the gown vigorously to unfold it."], correctIndex:1, rationale:"This is the first step of gowning to maintain the sterility of the hands for gloving."},
+  {id:57, sectionTitle:"Section 6: Perioperative and Operating Theatre (OT) Standards", sectionQ:7, prompt:"Closed gloving is performed:", options:["Before the sterile gown is put on.","While the hands are still inside the sleeves of the sterile gown.","Using non-sterile gloves.","By the circulating nurse for the scrub nurse."], correctIndex:1, rationale:"Closed gloving protects the sterile field by ensuring the skin never touches the outside of the glove."},
+  {id:58, sectionTitle:"Section 6: Perioperative and Operating Theatre (OT) Standards", sectionQ:8, prompt:"What should the nurse do if a sterile glove is punctured during a procedure?", options:["Patch it with medical tape.","Continue the procedure and change it afterward.","Change both the glove and the gown if contaminated.","Wash the gloved hand with antiseptic."], correctIndex:2, rationale:"Any breach in sterility requires immediate correction to prevent surgical site infection."},
+  {id:59, sectionTitle:"Section 6: Perioperative and Operating Theatre (OT) Standards", sectionQ:9, prompt:"The goal of the surgical handrub is to:", options:["Sterilize the skin completely.","Reduce the number of microorganisms to a minimum.","Soften the skin for better glove fit.","Remove all jewelry and watches."], correctIndex:1, rationale:"The goal is reduction, as complete sterilization of skin is not possible."},
+  {id:60, sectionTitle:"Section 6: Perioperative and Operating Theatre (OT) Standards", sectionQ:10, prompt:"Which is a requirement for self-preparation before a surgical handrub?", options:["Ensure fingernails are long and polished.","Remove all jewelry, including rings and watches.","Wear a fluid shield mask over the eyes only.","Scrub only the palms of the hands."], correctIndex:1, rationale:"All jewelry must be removed as it harbors microorganisms."},
+
+  // Section 7: Complex Scenarios and Clinical Reasoning (20)
+  {id:61, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:1, prompt:"A patient with cirrhosis presents with \"Asterixis.\" The nurse recognizes this as a sign of:", options:["Impending GI bleed","Hepatic encephalopathy","Acute renal failure","Cholecystitis"], correctIndex:1, rationale:"Asterixis (liver flap) is a hallmark of hepatic encephalopathy."},
+  {id:62, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:2, prompt:"A patient with a duodenal ulcer is most likely to experience pain during which time?", options:["15 minutes after eating","At night or 2–3 hours after a meal","Only when the stomach is full","During the act of swallowing"], correctIndex:1, rationale:"Pain occurs when the stomach empties its acidic contents into the duodenum."},
+  {id:63, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:3, prompt:"Which lab value is most critical to monitor in a patient with a suspected bowel obstruction?", options:["Serum Calcium","Electrolytes (Potassium/Sodium) and BUN","Total Cholesterol","Uric acid"], correctIndex:1, rationale:"Dehydration and electrolyte imbalances are major risks in bowel obstruction."},
+  {id:64, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:4, prompt:"A patient with liver failure has an INR of 2.5. The nurse should implement:", options:["Fall precautions and bleeding precautions","A high-protein diet","Vigorous exercise to improve circulation","Administration of a stimulant laxative"], correctIndex:0, rationale:"High INR means high bleeding risk; fall and injury prevention are key."},
+  {id:65, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:5, prompt:"A patient with a colostomy reports that the stoma is slightly swollen and pink three days after surgery. The nurse’s best action is:", options:["Notify the surgeon of an emergency.","Document the finding as normal postoperative expected behavior.","Apply a tight compression bandage.","Irrigate the stoma with 500 mL of water."], correctIndex:1, rationale:"A pink, slightly swollen stoma is a normal finding in the early postoperative period."},
+  {id:66, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:6, prompt:"A patient asks why they are receiving a \"Triple Therapy\" regimen for an ulcer. The nurse explains that two of the medications are:", options:["To stop the pain and one is to stop the acid.","Antibiotics to kill the H. pylori bacteria.","Laxatives to clean the bowel.","Steroids to reduce inflammation."], correctIndex:1, rationale:"Eradication of H. pylori requires antibiotics."},
+  {id:67, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:7, prompt:"Following a colectomy, a patient’s bowel sounds are absent. The nurse should:", options:["Provide a full liquid meal immediately.","Keep the patient NPO (nothing by mouth) and monitor for flatulence/bowel sounds.","Give a high-dose stimulant laxative.","Encourage the patient to stay flat in bed."], correctIndex:1, rationale:"Return of peristalsis must be confirmed (sounds/flatus) before oral intake."},
+  {id:68, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:8, prompt:"A patient with a history of gallstones presents with jaundice. The nurse understands this jaundice is likely:", options:["Hemolytic","Obstructive (post-hepatic)","Hepatocellular","Non-existent"], correctIndex:1, rationale:"Gallstones blocking the bile duct prevent bilirubin from reaching the gut."},
+  {id:69, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:9, prompt:"In assessing a patient for \"Rebound Tenderness,\" the nurse:", options:["Presses slowly and then lets go quickly.","Percusses the liver.","Auscultates for bruits.","Palpates the umbilicus."], correctIndex:0, rationale:"Pain on release indicates peritoneal irritation."},
+  {id:70, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:10, prompt:"A patient with cirrhosis is being evaluated for a liver transplant. Which score indicates the highest urgency?", options:["Low MELD score","Child-Pugh Class A","High MELD score","Normal albumin levels"], correctIndex:2, rationale:"Higher MELD scores indicate a higher risk of mortality and greater urgency."},
+  {id:71, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:11, prompt:"A nurse is educating a patient on avoiding PUD recurrence. Which of the following is a \"red flag\" symptom requiring immediate care?", options:["Mild bloating","Black, tarry stools","Occasional heartburn","Hunger pains"], correctIndex:1, rationale:"This indicates active GI bleeding."},
+  {id:72, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:12, prompt:"A nurse identifies \"mechanical\" obstruction in a patient. Which of the following is a common cause?", options:["Use of opioids","Surgical adhesions","Electrolyte imbalance","Diabetes"], correctIndex:1, rationale:"Adhesions are a physical barrier causing mechanical obstruction."},
+  {id:73, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:13, prompt:"A nurse is caring for a patient who had a hemicolectomy. Which finding should be reported to the provider immediately?", options:["A small amount of serosanguinous drainage on the dressing.","A heart rate of 120 bpm and blood pressure of 90/60 mmHg.","Hypoactive bowel sounds.","Complaints of mild incisional pain."], correctIndex:1, rationale:"These are signs of shock, possibly from internal hemorrhage."},
+  {id:74, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:14, prompt:"A patient with cholecystitis is placed on a \"fat-restricted\" diet. What is the rationale?", options:["Fat causes the gallbladder to contract, which triggers pain.","Fat increases the production of stomach acid.","Fat prevents the absorption of water.","Fat inhibits the action of PPIs."], correctIndex:0, rationale:"Fat triggers cholecystokinin release, causing painful gallbladder contractions."},
+  {id:75, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:15, prompt:"The \"Spiral\" shape of H. pylori is significant because it allows the bacteria to:", options:["Swim faster in the bloodstream.","Penetrate the protective gastric mucus layer.","Attach to the red blood cells.","Multiply in the lungs."], correctIndex:1, rationale:"The shape is an evolutionary adaptation for movement through mucus."},
+  {id:76, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:16, prompt:"A patient has a 75% obstruction of the sigmoid colon due to a mass. The nurse anticipates the stool caliber will be:", options:["Increased","Decreased (pencil-thin)","Normal","Non-existent"], correctIndex:1, rationale:"Luminal narrowing results in thin, caliber-decreased stools."},
+  {id:77, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:17, prompt:"For a patient with a stoma, when should the pouch be emptied?", options:["Every 15 minutes.","When it is more than one-half full.","Only once a week.","Every time the patient drinks water."], correctIndex:1, rationale:"This prevents the weight of the pouch from pulling on the stoma or causing leaks."},
+  {id:78, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:18, prompt:"A patient is receiving IV Albumin. The nurse understands this will help to:", options:["Increase the osmotic pressure and pull fluid back into the vessels.","Directly kill Hepatitis B virus.","Thin the blood to prevent clots.","Lower the patient’s glucose level."], correctIndex:0, rationale:"Albumin is a major contributor to oncotic pressure."},
+  {id:79, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:19, prompt:"A nurse is assessing for \"Fluid Wave.\" This technique requires:", options:["One nurse to tap the side of the abdomen while another feels for the wave.","The patient to stand on one leg.","Percussing the lungs.","Measuring the patient's height."], correctIndex:0, rationale:"This is the standard technique to feel a fluid impulse across the abdomen."},
+  {id:80, sectionTitle:"Section 7: Complex Scenarios and Clinical Reasoning", sectionQ:20, prompt:"A patient with Hepatitis B asks why they feel weak. The nurse explains that:", options:["The liver is not processing glucose and nutrients effectively.","They are not sleeping enough.","The brain is producing too much adrenaline.","Their muscles are growing too fast."], correctIndex:0, rationale:"Liver dysfunction impairs glucose metabolism and energy storage."}
+];
+
+// ---------- quiz engine ----------
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+let quiz = [];
+let state = null;
+
+function startNewAttempt(){
+  quiz = shuffle(quizBank);
+  state = {
+    i: 0,
+    answers: quiz.map(() => ({ selectedIndex: null, submitted: false, correct: false }))
+  };
+  render();
+}
+
+function pct(n,d){ return d ? Math.round((n/d)*100) : 0; }
+
+function calcScore(){
+  let correct = 0, attempted = 0;
+  state.answers.forEach(a=>{
+    if(a.submitted){ attempted++; if(a.correct) correct++; }
+  });
+  return {correct, attempted, total: quiz.length, percent: pct(correct, quiz.length)};
+}
+
+function render(){
+  const app = document.getElementById("app");
+  app.innerHTML = "";
+
+  const sc = calcScore();
+  const top = document.createElement("div");
+  top.className = "topbar";
+  top.innerHTML = `
+    <div class="score">
+      <div><strong>Score:</strong> ${sc.correct}/${sc.total} (${sc.percent}%)</div>
+      <div class="muted">Attempted: ${sc.attempted}/${sc.total}</div>
+    </div>
+    <div class="muted">Question ${Math.min(state.i+1, quiz.length)} of ${quiz.length}</div>
+  `;
+  app.appendChild(top);
+
+  if(state.i >= quiz.length){
+    const end = document.createElement("div");
+    end.className = "card end";
+    end.innerHTML = `
+      <h2>Quiz completed</h2>
+      <p>Final score: ${sc.correct}/${sc.total} (${sc.percent}%).</p>
+      <div style="margin-top:14px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
+        <button class="primary" id="retake">Retake (randomized)</button>
+        <button id="export">Export results (JSON)</button>
+      </div>
+      <p class="muted" style="margin-top:12px">Questions are randomized each attempt; options stay as A–D.</p>
+    `;
+    app.appendChild(end);
+    end.querySelector("#retake").addEventListener("click", startNewAttempt);
+    end.querySelector("#export").addEventListener("click", exportResults);
+    return;
+  }
+
+  const q = quiz[state.i];
+  const a = state.answers[state.i];
+
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `
+    <div class="qmeta">
+      <div class="pill">${a.submitted ? "Submitted (locked)" : "Not submitted"}</div>
+      <div class="pill">${a.submitted ? (a.correct ? "Correct" : "Incorrect") : "Choose one option"}</div>
+    </div>
+
+    <div class="pill" style="margin-bottom:10px">
+      ${q.sectionTitle} — Q${q.sectionQ}
+    </div>
+
+    <h1>${q.prompt}</h1>
+    <div class="options" id="options"></div>
+    <div id="feedback"></div>
+    <div class="actions">
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button id="prev" ${state.i===0 ? "disabled":""}>Previous</button>
+        <button id="restart">Restart (randomized)</button>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="primary" id="submit" ${(a.selectedIndex===null || a.submitted) ? "disabled":""}>Submit answer</button>
+        <button id="next" ${a.submitted ? "" : "disabled"}>${state.i===quiz.length-1 ? "Finish quiz" : "Next question"}</button>
+      </div>
+    </div>
+  `;
+  app.appendChild(card);
+
+  const optWrap = card.querySelector("#options");
+  q.options.forEach((text, idx)=>{
+    const opt = document.createElement("div");
+    opt.className = "opt";
+    if(a.selectedIndex === idx) opt.classList.add("chosen");
+    if(a.submitted && idx === q.correctIndex) opt.classList.add("correct");
+    if(a.submitted && a.selectedIndex === idx && idx !== q.correctIndex) opt.classList.add("incorrect");
+
+    opt.innerHTML = `
+      <input type="radio" name="opt" ${a.selectedIndex===idx ? "checked":""} ${a.submitted ? "disabled":""}/>
+      <div>
+        <div class="muted" style="font-size:12px">Option ${String.fromCharCode(65+idx)}</div>
+        <div>${text}</div>
+      </div>
+    `;
+
+    opt.addEventListener("click", ()=>{
+      if(a.submitted) return;
+      a.selectedIndex = idx;
+      render();
+    });
+
+    optWrap.appendChild(opt);
+  });
+
+  const fb = card.querySelector("#feedback");
+  if(a.submitted){
+    fb.innerHTML = `
+      <div class="feedback">
+        <div class="result ${a.correct ? "ok":"bad"}">${a.correct ? "Correct" : "Incorrect"}</div>
+        <div><strong>Rationale:</strong> ${q.rationale}</div>
+      </div>
+    `;
+  } else {
+    fb.innerHTML = `
+      <div class="footerNote">
+        After you click <span class="kbd">Submit answer</span>, your choice is locked until the quiz is completed.
+      </div>
+    `;
+  }
+
+  card.querySelector("#prev").addEventListener("click", ()=>{ if(state.i>0){ state.i--; render(); }});
+  card.querySelector("#restart").addEventListener("click", startNewAttempt);
+  card.querySelector("#submit").addEventListener("click", ()=>{
+    if(a.submitted || a.selectedIndex===null) return;
+    a.submitted = true;
+    a.correct = (a.selectedIndex === q.correctIndex);
+    render();
+  });
+  card.querySelector("#next").addEventListener("click", ()=>{
+    if(!a.submitted) return;
+    state.i++;
+    render();
+  });
+}
+
+function exportResults(){
+  const sc = calcScore();
+  const payload = {
+    title: document.title,
+    completedAt: new Date().toISOString(),
+    randomized: true,
+    score: sc,
+    questions: quiz.map((q, idx)=>({
+      id: q.id,
+      sectionTitle: q.sectionTitle,
+      sectionQ: q.sectionQ,
+      prompt: q.prompt,
+      options: q.options,
+      correctIndex: q.correctIndex,
+      selectedIndex: state.answers[idx].selectedIndex,
+      submitted: state.answers[idx].submitted,
+      correct: state.answers[idx].correct,
+      rationale: q.rationale
+    }))
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "quiz-results.json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+startNewAttempt();
+</script>
+</body>
+</html>
